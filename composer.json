@@ -1,0 +1,42 @@
+{
+    "name": "apih/laravel-route-list-web",
+    "description": "View all routes for your Laravel app via a web page in a browser",
+    "keywords": [
+        "apih",
+        "php",
+        "laravel",
+        "route list",
+        "gui",
+        "browser"
+    ],
+    "homepage": "https://github.com/apih/laravel-route-list-web",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mohd Hafizuddin M Marzuki",
+            "email": "hafizuddin_83@yahoo.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "laravel/framework": "^8.0|^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Apih\\RouteListWeb\\": "src"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Apih\\RouteListWeb\\RouteListWebServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
