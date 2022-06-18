@@ -154,9 +154,9 @@
                             let value;
 
                             if (this.search.column === 'all') {
-                                value = JSON.stringify(route);
-                            } else  if (this.search.column === 'middleware') {
-                                value = JSON.stringify(route.middleware);
+                                value = JSON.stringify(Object.values(route));
+                            } else  if (this.search.column === 'method' || this.search.column === 'middleware') {
+                                value = JSON.stringify(route[this.search.column]);
                             } else {
                                 value = route[this.search.column];
                             }
@@ -188,7 +188,8 @@
                 },
 
                 stylizeUri: function (domain, uri) {
-                    uri = (domain ? domain + '/' : '') + uri;
+                    uri = domain ? domain + '/' + uri : uri;
+                    uri = uri.replace(/\/$/, '');
                     uri = uri.replaceAll('{', '<span class="text-orange">{').replaceAll('}', '}</span>');
 
                     return uri;
