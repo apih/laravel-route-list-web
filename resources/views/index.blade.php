@@ -54,8 +54,17 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-md-10">
-                <input type="text" class="form-control" placeholder="Search here..." x-model="search.value" x-on:keydown.escape="search.value = ''">
+            <div class="col-md-9 mt-1 mt-md-0">
+                <input type="text" class="form-control" placeholder="Search here..." x-model.debounce.300="search.value" x-on:keydown.escape="search.value = ''">
+            </div>
+            <div class="col-md-1 d-grid mt-2 mt-md-0">
+                <button type="button" class="btn btn-primary" x-on:click="refresh" x-bind:disabled="refreshing">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                    </svg>
+                    Refresh
+                </button>
             </div>
         </div>
 
@@ -95,7 +104,7 @@
                     </tr>
                 </thead>
                 <tbody style="font-size: 90%">
-                    <template x-for="route in getRoutes()">
+                    <template x-for="(route, index) in getRoutes()" x-bind:key="index">
                         <tr>
                             <td x-show="columns.method" style="width: 120px">
                                 <template x-for="method in route.method">
@@ -110,13 +119,13 @@
                             </td>
                             <td class="font-monospace" x-show="columns.action || columns.middleware">
                                 <div class="fw-medium" x-html="stylizeAction(route.action)" x-show="columns.action"></div>
-                                <template x-if="columns.middleware">
+                                <div x-show="columns.middleware">
                                     <div class="small">
                                         <template x-for="item in route.middleware">
-                                            <div x-text="item"></div>
+                                            <div x-text="'- ' + item"></div>
                                         </template>
                                     </div>
-                                </template>
+                                </div>
                             </td>
                         </tr>
                     </template>
@@ -129,8 +138,10 @@
     <script>
         window.RouteList = function () {
             return {
-                routes: @json($routes),
+                routes: [],
+                total: @json($routes->count()),
                 filteredCount: @json($routes->count()),
+                refreshing: false,
 
                 search: {
                     column: 'all',
@@ -141,6 +152,31 @@
                     @foreach ($columns as $column => $label)
                         {{ $column }}: true,
                     @endforeach
+                },
+
+                init: function () {
+                    const that = this;
+
+                    that.$nextTick(function () {
+                        that.routes = @json($routes);
+                    });
+                },
+
+                refresh: function () {
+                    const that = this;
+                    that.refreshing = true;
+
+                    fetch(@json(route('route:list')), {
+                        headers: {
+                            'Accept': 'application/json',
+                        },
+                    }).then(function (response) {
+                        return response.json();
+                    }).then(function (routes) {
+                        that.routes = routes;
+                        that.total = routes.length;
+                        that.refreshing = false;
+                    });
                 },
 
                 getRoutes: function () {

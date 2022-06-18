@@ -1,9 +1,10 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 
-Route::get('route:list', function () {
+Route::get('route:list', function (Request $request) {
     $router = app(Router::class);
     $router->flushMiddlewareGroups();
 
@@ -28,5 +29,7 @@ Route::get('route:list', function () {
         'middleware' => 'Middleware',
     ];
 
-    return view('routelistweb::index', compact('routes', 'columns'));
+    return $request->expectsJson()
+        ? $routes
+        : view('routelistweb::index', compact('routes', 'columns'));
 })->name('route:list');
