@@ -86,7 +86,7 @@
             </div>
         </div>
 
-        <div class="table-responsive">
+        <div class="table-responsive" x-show="loaded" x-cloak>
             <table class="table table-sm">
                 <thead>
                     <tr class="table-dark">
@@ -141,24 +141,26 @@
                 routes: [],
                 total: @json($routes->count()),
                 filteredCount: @json($routes->count()),
+                loaded: false,
                 refreshing: false,
 
-                search: {
+                search: Alpine.$persist({
                     column: 'all',
                     value: '',
-                },
+                }).as('rlw_search'),
 
-                columns: {
+                columns: Alpine.$persist({
                     @foreach ($columns as $column => $label)
                         {{ $column }}: true,
                     @endforeach
-                },
+                }).as('rlw_columns'),
 
                 init: function () {
                     const that = this;
 
                     that.$nextTick(function () {
                         that.routes = @json($routes);
+                        that.loaded = true;
                     });
                 },
 
@@ -241,6 +243,7 @@
             };
         };
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.10.2/dist/cdn.min.js" integrity="sha256-43ez6+bP6Wa4gdxcSg0Z1uy4yElzYS3aOngTFlsC3+Y=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.2/dist/cdn.min.js" integrity="sha256-0Vc6RcGUGe6IHT9+bWgQu5VeoNZEcNofGHVTfeGMYD4=" crossorigin="anonymous"></script>
 </body>
 </html>
