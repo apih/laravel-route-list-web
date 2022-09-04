@@ -21,24 +21,20 @@
             font-weight: 500;
         }
 
-        .nowrap {
-            white-space: nowrap;
-        }
-
         .text-indigo {
-            color: #6610f2;
+            color: var(--bs-indigo);
         }
 
         .text-orange {
-            color: #fd7e14;
+            color: var(--bs-orange);
         }
 
-        .bg-green {
-            background-color: #28a745;
+        .bg-teal {
+            background-color: var(--bs-teal);
         }
 
         .bg-orange {
-            background-color: #fd7e14;
+            background-color: var(--bs-orange);
         }
     </style>
 </head>
@@ -87,7 +83,7 @@
         </div>
 
         <div class="table-responsive" x-show="loaded" x-cloak>
-            <table class="table table-sm">
+            <table class="table table-sm table-hover">
                 <thead>
                     <tr class="table-dark">
                         <th x-show="columns.method">Method</th>
@@ -109,12 +105,12 @@
                             <td x-show="columns.method" style="width: 120px">
                                 <template x-for="method in route.method">
                                     <span>
-                                        <span class="badge" x-bind:class="getMethodColor(method)" x-text="method"></span>
+                                        <span class="badge py-1" x-bind:class="getMethodColor(method)" x-text="method"></span>
                                     </span>
                                 </template>
                             </td>
                             <td class="font-monospace" x-show="columns.uri || columns.name">
-                                <div class="fw-medium nowrap" x-html="stylizeUri(route.domain, route.uri)" x-show="columns.uri"></div>
+                                <div class="fw-medium text-nowrap" x-html="stylizeUri(route.domain, route.uri)" x-show="columns.uri"></div>
                                 <div x-text="route.name" x-show="columns.name"></div>
                             </td>
                             <td class="font-monospace" x-show="columns.action || columns.middleware">
@@ -214,7 +210,7 @@
 
                 getMethodColor: function (method) {
                     return 'bg-' + ({
-                        get: 'green',
+                        get: 'teal',
                         head: 'secondary',
                         options: 'info',
                         post: 'primary',
