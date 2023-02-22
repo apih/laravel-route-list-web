@@ -11,7 +11,7 @@ This package provides a way to view your Laravel app routes via a web browser.
 ## Requirements
 
 - PHP: `^8.0`
-- Laravel: `^8.0|^9.0`
+- Laravel: `^8.0|^9.0|^10.0`
 
 ## Installation
 
