@@ -6,6 +6,32 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('route:list', function (Request $request) {
     $router = app(Router::class);
+
+    $aliases = $router->getMiddleware();
+    $groups = $router->getMiddlewareGroups();
+
+    foreach ($groups as $group => $groupMiddlewares) {
+        foreach ($groupMiddlewares as $key => $groupMiddleware) {
+            if (str_contains($groupMiddleware, '\\')) {
+                continue;
+            }
+
+            $parameters = null;
+
+            if (str_contains($groupMiddleware, ':')) {
+                [$groupMiddleware, $parameters] = explode(':', $groupMiddleware, 2);
+            }
+
+            if (isset($aliases[$groupMiddleware])) {
+                $groupMiddleware = $aliases[$groupMiddleware];
+            }
+
+            $groupMiddlewares[$key] = $groupMiddleware . ($parameters ? ':' . $parameters : '');
+        }
+
+        $groups[$group] = $groupMiddlewares;
+    }
+
     $router->flushMiddlewareGroups();
 
     $routes = collect(Route::getRoutes())->map(function ($route) use ($router) {
@@ -30,6 +56,6 @@ Route::get('route:list', function (Request $request) {
     ];
 
     return $request->expectsJson()
-        ? $routes
-        : view('routelistweb::index', compact('routes', 'columns'));
+        ? compact('groups', 'routes')
+        : view('routelistweb::index', compact('groups', 'routes', 'columns'));
 })->name('route:list');

@@ -71,8 +71,8 @@
 
 <body>
     <div class="container-fluid" x-data="RouteList()">
-        <div class="row mt-3 mb-2">
-            <div class="col-md-2">
+        <div class="d-flex flex-column flex-md-row justify-content-start gap-2 mt-3 mb-2">
+            <div>
                 <select class="form-select" x-model="search.column">
                         <option value="all">All</option>
                     @foreach ($columns as $column => $label)
@@ -80,10 +80,10 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-md-9 mt-1 mt-md-0">
+            <div class="flex-fill">
                 <input type="text" class="form-control" placeholder="Search here..." x-model.debounce.300="search.value" x-on:keydown.escape="search.value = ''">
             </div>
-            <div class="col-md-1 d-grid mt-2 mt-md-0">
+            <div class="ms-auto">
                 <button type="button" class="btn btn-primary" x-on:click="refresh" x-bind:disabled="refreshing">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
@@ -94,8 +94,9 @@
             </div>
         </div>
 
-        <div class="row mb-2">
-            <div class="col-md-9">
+        <div class="d-flex flex-column flex-md-row justify-content-start align-md-items-center gap-1 mb-2">
+            <div class="align-sm-self-stretch">
+                <label class="col-form-label fw-bold me-2">Columns</label>
                 @foreach ($columns as $column => $label)
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="checkbox" id="columns.{{ $column }}" x-model="columns.{{ $column }}">
@@ -105,11 +106,20 @@
                     </div>
                 @endforeach
             </div>
-            <div class="col-md-3">
-                <div class="fw-bold text-end">
-                    <div class="d-inline-block me-1"><span x-show="filteredCount !== routes.length" x-cloak><span x-text="filteredCount"></span> of</span> <span x-text="total">{{ $routes->count() }}</span> routes</div>
+            <div class="align-sm-self-stretch ms-md-2">
+                <label class="col-form-label fw-bold me-2">Options</label>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="options.expandMiddlewareGroup" x-model="options.expandMiddlewareGroup">
+                    <label class="form-check-label" for="options.expandMiddlewareGroup">
+                        Expand Middleware Group
+                    </label>
+                </div>
+            </div>
+            <div class="align-sm-self-stretch ms-auto pt-1">
+                <div class="d-flex align-items-center fw-bold">
+                    <span><span x-show="filteredCount !== routes.length" x-cloak><span x-text="filteredCount"></span> of</span> <span x-text="total">{{ $routes->count() }}</span> routes</span>
 
-                    <button type="button" class="theme-toggle" x-on:click="darkMode = !darkMode">
+                    <button type="button" class="theme-toggle ms-1" x-on:click="darkMode = !darkMode">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-sun-fill" viewBox="0 0 16 16" x-show="!darkMode" x-cloak>
                             <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
                         </svg>
@@ -173,6 +183,7 @@
     <script>
         window.RouteList = function () {
             return {
+                groups: [],
                 routes: [],
                 total: @json($routes->count()),
                 filteredCount: @json($routes->count()),
@@ -191,6 +202,10 @@
                     @endforeach
                 }).as('rlw_columns'),
 
+                options: Alpine.$persist({
+                    expandMiddlewareGroup: false,
+                }),
+
                 init: function () {
                     const that = this;
 
@@ -205,6 +220,7 @@
                     });
 
                     that.$nextTick(function () {
+                        that.groups = @json($groups);
                         that.routes = @json($routes);
                         that.loaded = true;
                     });
@@ -220,21 +236,32 @@
                         },
                     }).then(function (response) {
                         return response.json();
-                    }).then(function (routes) {
-                        that.routes = routes;
-                        that.total = routes.length;
+                    }).then(function (data) {
+                        that.routes = data.routes;
+                        that.total = data.routes.length;
                         that.refreshing = false;
                     });
                 },
 
                 getRoutes: function () {
                     let routes = Array.from(this.routes);
+                    let filtered = [];
 
-                    if (this.search.value.trim().length > 0) {
-                        let filteredRoutes = [];
+                    for (const _route of routes) {
+                        const route = Object.assign({}, _route);
+                        route.middleware = Array.from(_route.middleware);
 
-                        for (let i = 0; i < routes.length; i++) {
-                            const route = routes[i];
+                        if (this.columns.middleware && this.options.expandMiddlewareGroup) {
+                            for (const [group, groupMiddlewares] of Object.entries(this.groups)) {
+                                const index = route.middleware.indexOf(group);
+
+                                if (index !== -1) {
+                                    route.middleware.splice(index, 1, ...groupMiddlewares);
+                                }
+                            }
+                        }
+
+                        if (this.search.value.trim().length > 0) {
                             let value;
 
                             if (this.search.column === 'all') {
@@ -246,16 +273,16 @@
                             }
 
                             if (value !== null && value.length > 0 && value.toLowerCase().includes(this.search.value.trim().toLowerCase())) {
-                                filteredRoutes.push(route);
+                                filtered.push(route);
                             }
+                        } else {
+                            filtered.push(route);
                         }
-
-                        routes = filteredRoutes;
                     }
 
-                    this.filteredCount = routes.length;
+                    this.filteredCount = filtered.length;
 
-                    return routes;
+                    return filtered;
                 },
 
                 getMethodColor: function (method) {
