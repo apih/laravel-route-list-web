@@ -6,7 +6,17 @@
 
 This package provides a way to view your Laravel app routes via a web browser.
 
-![Route List Web](screenshot.png)
+## Screenshots
+
+<details>
+    <summary>Light Mode</summary>
+    <img src="screenshot-light-mode.png">
+</details>
+
+<details>
+    <summary>Dark Mode</summary>
+    <img src="screenshot-dark-mode.png">
+</details>
 
 ## Requirements
 
