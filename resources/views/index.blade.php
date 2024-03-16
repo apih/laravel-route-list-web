@@ -181,112 +181,105 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha256-CDOy6cOibCWEdsRiZuaHf8dSGGJRYuBGC+mjoJimHGw=" crossorigin="anonymous"></script>
     <script>
-        window.RouteList = function () {
-            return {
-                groups: [],
-                routes: [],
-                total: @json($routes->count()),
-                filteredCount: @json($routes->count()),
-                loaded: false,
-                refreshing: false,
-                darkMode: Alpine.$persist(false).as('rlw_darkMode'),
+        window.RouteList = () => ({
+            groups: [],
+            routes: [],
+            total: @json($routes->count()),
+            filteredCount: @json($routes->count()),
+            loaded: false,
+            refreshing: false,
+            darkMode: Alpine.$persist(false).as('rlw_darkMode'),
 
-                search: Alpine.$persist({
-                    column: 'all',
-                    value: '',
-                }).as('rlw_search'),
+            search: Alpine.$persist({
+                column: 'all',
+                value: '',
+            }).as('rlw_search'),
 
-                columns: Alpine.$persist({
-                    @foreach ($columns as $column => $label)
-                        {{ $column }}: true,
-                    @endforeach
-                }).as('rlw_columns'),
+            columns: Alpine.$persist({
+                @foreach ($columns as $column => $label)
+                    {{ $column }}: true,
+                @endforeach
+            }).as('rlw_columns'),
 
-                options: Alpine.$persist({
-                    expandMiddlewareGroup: false,
-                }),
+            options: Alpine.$persist({
+                expandMiddlewareGroup: false,
+            }).as('rlw_options'),
 
-                init: function () {
-                    const that = this;
+            init() {
+                const enableDarkMode = (value) => (document.documentElement.dataset.bsTheme = value ? 'dark' : 'light');
+                enableDarkMode(this.darkMode);
 
-                    function enableDarkMode(value) {
-                        document.documentElement.dataset.bsTheme = value ? 'dark' : 'light';
-                    }
+                this.$watch('darkMode', enableDarkMode);
 
-                    enableDarkMode(that.darkMode);
+                this.$nextTick(() => {
+                    this.groups = @json($groups);
+                    this.routes = @json($routes);
+                    this.loaded = true;
+                });
+            },
 
-                    that.$watch('darkMode', function (value) {
-                        enableDarkMode(value);
+            refresh() {
+                this.refreshing = true;
+
+                fetch(@json(route('route:list')), {
+                    headers: {
+                        Accept: 'application/json',
+                    },
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        this.routes = data.routes;
+                        this.total = data.routes.length;
+                        this.refreshing = false;
                     });
+            },
 
-                    that.$nextTick(function () {
-                        that.groups = @json($groups);
-                        that.routes = @json($routes);
-                        that.loaded = true;
-                    });
-                },
+            getRoutes() {
+                let routes = Array.from(this.routes);
+                let filtered = [];
 
-                refresh: function () {
-                    const that = this;
-                    that.refreshing = true;
+                for (const _route of routes) {
+                    const route = Object.assign({}, _route);
+                    route.middleware = Array.from(_route.middleware);
 
-                    fetch(@json(route('route:list')), {
-                        headers: {
-                            'Accept': 'application/json',
-                        },
-                    }).then(function (response) {
-                        return response.json();
-                    }).then(function (data) {
-                        that.routes = data.routes;
-                        that.total = data.routes.length;
-                        that.refreshing = false;
-                    });
-                },
+                    if (this.columns.middleware && this.options.expandMiddlewareGroup) {
+                        for (const [group, groupMiddlewares] of Object.entries(this.groups)) {
+                            const index = route.middleware.indexOf(group);
 
-                getRoutes: function () {
-                    let routes = Array.from(this.routes);
-                    let filtered = [];
-
-                    for (const _route of routes) {
-                        const route = Object.assign({}, _route);
-                        route.middleware = Array.from(_route.middleware);
-
-                        if (this.columns.middleware && this.options.expandMiddlewareGroup) {
-                            for (const [group, groupMiddlewares] of Object.entries(this.groups)) {
-                                const index = route.middleware.indexOf(group);
-
-                                if (index !== -1) {
-                                    route.middleware.splice(index, 1, ...groupMiddlewares);
-                                }
+                            if (index !== -1) {
+                                route.middleware.splice(index, 1, ...groupMiddlewares);
                             }
                         }
+                    }
 
-                        if (this.search.value.trim().length > 0) {
-                            let value;
+                    if (this.search.value.trim().length > 0) {
+                        let value;
 
-                            if (this.search.column === 'all') {
-                                value = JSON.stringify(Object.values(route));
-                            } else  if (this.search.column === 'method' || this.search.column === 'middleware') {
-                                value = JSON.stringify(route[this.search.column]);
-                            } else {
-                                value = route[this.search.column];
-                            }
-
-                            if (value !== null && value.length > 0 && value.toLowerCase().includes(this.search.value.trim().toLowerCase())) {
-                                filtered.push(route);
-                            }
+                        if (this.search.column === 'all') {
+                            value = JSON.stringify(Object.values(route));
+                        } else if (this.search.column === 'method' || this.search.column === 'middleware') {
+                            value = JSON.stringify(route[this.search.column]);
                         } else {
+                            value = route[this.search.column];
+                        }
+
+                        if (value !== null && value.length > 0 && value.toLowerCase().includes(this.search.value.trim().toLowerCase())) {
                             filtered.push(route);
                         }
+                    } else {
+                        filtered.push(route);
                     }
+                }
 
-                    this.filteredCount = filtered.length;
+                this.filteredCount = filtered.length;
 
-                    return filtered;
-                },
+                return filtered;
+            },
 
-                getMethodColor: function (method) {
-                    return 'bg-' + ({
+            getMethodColor(method) {
+                return (
+                    'bg-' +
+                    {
                         get: 'teal',
                         head: 'secondary',
                         options: 'info',
@@ -295,26 +288,26 @@
                         patch: 'orange',
                         delete: 'danger',
                         any: 'dark',
-                    })[method.toLowerCase()];
-                },
+                    }[method.toLowerCase()]
+                );
+            },
 
-                stylizeUri: function (domain, uri) {
-                    uri = domain ? domain + '/' + uri : uri;
-                    uri = uri.replace(/\/$/, '');
-                    uri = uri.replaceAll('{', '<span class="text-orange">{').replaceAll('}', '}</span>');
+            stylizeUri(domain, uri) {
+                uri = domain ? domain + '/' + uri : uri;
+                uri = uri.replace(/\/$/, '');
+                uri = uri.replaceAll('{', '<span class="text-orange">{').replaceAll('}', '}</span>');
 
-                    return uri;
-                },
+                return uri;
+            },
 
-                stylizeAction: function (action) {
-                    if (action.includes('@')) {
-                        action = action.replace('@', '<span class="text-primary">@') + '</span>';
-                    }
-
-                    return action;
+            stylizeAction(action) {
+                if (action.includes('@')) {
+                    action = action.replace('@', '<span class="text-primary">@') + '</span>';
                 }
-            };
-        };
+
+                return action;
+            },
+        });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.13.7/dist/cdn.min.js" integrity="sha256-cSGI2lvtPAlqoZD791tZcYCukUZcmhwo0SnJjG142RU=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.7/dist/cdn.min.js" integrity="sha256-W9xdY1a0Nk2QJAZVLIGVqJ6HiGG891GDFl74DSopWuI=" crossorigin="anonymous"></script>
