@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Route List Web</title>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha256-MBffSnbbXwHCuZtgPYiwMQbfE7z+GOZ7fBPCNB06Z98=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha256-PI8n5gCcz9cQqQXm3PEtDuPG8qx9oFsFctPg0S5zb8g=" crossorigin="anonymous">
     <link href="https://fonts.bunny.net/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
@@ -179,7 +179,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha256-gvZPYrsDwbwYJLD5yeBfcNujPhRoGOY831wwbIzz3t0=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha256-CDOy6cOibCWEdsRiZuaHf8dSGGJRYuBGC+mjoJimHGw=" crossorigin="anonymous"></script>
     <script>
         window.RouteList = function () {
             return {
@@ -316,7 +316,7 @@
             };
         };
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.13.2/dist/cdn.min.js" integrity="sha256-cSGI2lvtPAlqoZD791tZcYCukUZcmhwo0SnJjG142RU=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.2/dist/cdn.min.js" integrity="sha256-MAnclv071ggEnpQbfWW6weXXKd5wErU2fZ6yuDYvdPE=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.13.7/dist/cdn.min.js" integrity="sha256-cSGI2lvtPAlqoZD791tZcYCukUZcmhwo0SnJjG142RU=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.7/dist/cdn.min.js" integrity="sha256-W9xdY1a0Nk2QJAZVLIGVqJ6HiGG891GDFl74DSopWuI=" crossorigin="anonymous"></script>
 </body>
 </html>
