@@ -309,7 +309,7 @@
             },
         });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.13.7/dist/cdn.min.js" integrity="sha256-cSGI2lvtPAlqoZD791tZcYCukUZcmhwo0SnJjG142RU=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.7/dist/cdn.min.js" integrity="sha256-W9xdY1a0Nk2QJAZVLIGVqJ6HiGG891GDFl74DSopWuI=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.14.0/dist/cdn.min.js" integrity="sha256-jFBwr6faTqqhp3sVi4/VTxJ0FpaF9YGZN1ZGLl/5QYM=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.0/dist/cdn.min.js" integrity="sha256-PZiMkGM0+toVfXqI7x7tzZvftHjfg+m3BeZGjw1sjdI=" crossorigin="anonymous"></script>
 </body>
 </html>
