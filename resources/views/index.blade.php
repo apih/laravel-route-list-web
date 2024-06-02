@@ -238,6 +238,18 @@
                 let routes = Array.from(this.routes);
                 let filtered = [];
 
+                const stringSerializer = (value) => {
+                    if (value === null || typeof value === 'undefined') {
+                        return '';
+                    } else if (Array.isArray(value)) {
+                        return value.map(stringSerializer).join(' ');
+                    } else if (typeof value === 'object') {
+                        return Object.entries(value).map(([key, value]) => `${key} ${stringSerializer(value)}`).join(' ');
+                    }
+
+                    return String(value);
+                };
+
                 for (const _route of routes) {
                     const route = Object.assign({}, _route);
                     route.middleware = Array.from(_route.middleware);
@@ -256,14 +268,14 @@
                         let value;
 
                         if (this.search.column === 'all') {
-                            value = JSON.stringify(Object.values(route));
+                            value = stringSerializer(Object.values(route));
                         } else if (this.search.column === 'method' || this.search.column === 'middleware') {
-                            value = JSON.stringify(route[this.search.column]);
+                            value = stringSerializer(route[this.search.column]);
                         } else {
                             value = route[this.search.column];
                         }
 
-                        if (value !== null && value.length > 0 && value.toLowerCase().includes(this.search.value.trim().toLowerCase())) {
+                        if (value && value.length > 0 && value.toLowerCase().includes(this.search.value.trim().toLowerCase())) {
                             filtered.push(route);
                         }
                     } else {
