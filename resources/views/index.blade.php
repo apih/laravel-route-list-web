@@ -70,7 +70,7 @@
 </head>
 
 <body>
-    <div class="container-fluid" x-data="RouteList()">
+    <div class="container-fluid pb-3" x-data="RouteList()">
         <div class="d-flex flex-column flex-md-row justify-content-start gap-2 mt-3 mb-2">
             <div>
                 <select class="form-select" x-model="search.column">
@@ -94,7 +94,7 @@
             </div>
         </div>
 
-        <div class="d-flex flex-column flex-md-row justify-content-start align-md-items-center gap-1 mb-2">
+        <div class="d-flex flex-column flex-md-row justify-content-start align-md-items-center gap-1 mb-1">
             <div class="align-sm-self-stretch">
                 <label class="col-form-label fw-bold me-2">Columns</label>
                 @foreach ($columns as $column => $label)
@@ -130,6 +130,26 @@
                 </div>
             </div>
         </div>
+
+        @section('pagination')
+            <nav x-show="loaded" x-cloak>
+                <ul class="pagination pagination-sm justify-content-center mb-2">
+                    <li class="page-item" x-bind:class="page <= 1 ? 'disabled' : ''">
+                        <a class="page-link" href="#" x-on:click.prevent="page > 1 && page--">&laquo;</a>
+                    </li>
+                    <template x-for="pageNumber in getPageNumbers()" x-bind:key="pageNumber">
+                        <li class="page-item" x-bind:class="pageNumber === page ? 'active' : ''">
+                            <a class="page-link" href="#" x-text="pageNumber" x-on:click.prevent="page = pageNumber"></a>
+                        </li>
+                    </template>
+                    <li class="page-item" x-bind:class="page >= totalPages ? 'disabled' : ''">
+                        <a class="page-link"  href="#" x-on:click.prevent="page < totalPages && page++">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        @endsection
+
+        @yield('pagination')
 
         <div class="table-responsive" x-show="loaded" x-cloak>
             <table class="table table-sm table-hover">
@@ -177,6 +197,8 @@
                 </tbody>
             </table>
         </div>
+
+        @yield('pagination')
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha256-CDOy6cOibCWEdsRiZuaHf8dSGGJRYuBGC+mjoJimHGw=" crossorigin="anonymous"></script>
@@ -205,11 +227,16 @@
                 expandMiddlewareGroup: false,
             }).as('rlw_options'),
 
+            page: Alpine.$persist(1).as('rlw_page'),
+            perPage: 50,
+            totalPages: 0,
+
             init() {
                 const enableDarkMode = (value) => (document.documentElement.dataset.bsTheme = value ? 'dark' : 'light');
                 enableDarkMode(this.darkMode);
 
                 this.$watch('darkMode', enableDarkMode);
+                this.$watch('search', (value) => this.page = 1);
 
                 this.$nextTick(() => {
                     this.groups = @json($groups);
@@ -230,6 +257,7 @@
                     .then((data) => {
                         this.routes = data.routes;
                         this.total = data.routes.length;
+                        this.page = 1;
                         this.refreshing = false;
                     });
             },
@@ -284,8 +312,13 @@
                 }
 
                 this.filteredCount = filtered.length;
+                this.totalPages = Math.ceil(filtered.length / this.perPage);
 
-                return filtered;
+                return filtered.slice((this.page - 1) * this.perPage, this.page * this.perPage);
+            },
+
+            getPageNumbers() {
+                return [...Array(this.totalPages).keys()].map((number) => number + 1);
             },
 
             getMethodColor(method) {
