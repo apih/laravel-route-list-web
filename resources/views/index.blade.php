@@ -374,13 +374,21 @@
             },
 
             stylizeMiddleware(middleware) {
+                const highlightParameters = (middleware) => {
+                    if (middleware.includes(':')) {
+                        middleware = middleware.replace(':', '<span class="text-indigo">:') + '</span>';
+                    }
+
+                    return middleware;
+                };
+
                 let alias = '';
 
                 if (this.options.showMiddlewareAlias && middleware.alias) {
-                    alias = ` (<span class="small">${middleware.alias}</span>)`;
+                    alias = ` (<span class="small">${highlightParameters(middleware.alias)}</span>)`;
                 }
 
-                return `<div class="${middleware.excluded ? 'text-decoration-line-through' : ''}">- ${middleware.name}${alias}</div>`;
+                return `<div class="${middleware.excluded ? 'text-decoration-line-through' : ''}">- ${highlightParameters(middleware.name)}${alias}</div>`;
             },
         });
     </script>
