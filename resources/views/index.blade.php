@@ -115,6 +115,12 @@
                     </label>
                 </div>
                 <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="options.showMiddlewareAlias" x-model="options.showMiddlewareAlias">
+                    <label class="form-check-label" for="options.showMiddlewareAlias">
+                        Show Middleware Alias
+                    </label>
+                </div>
+                <div class="form-check form-check-inline">
                     <input class="form-check-input" type="checkbox" id="options.showExcludedMiddleware" x-model="options.showExcludedMiddleware">
                     <label class="form-check-label" for="options.showExcludedMiddleware">
                         Show Excluded Middleware
@@ -231,6 +237,7 @@
 
             options: Alpine.$persist({
                 expandMiddlewareGroup: false,
+                showMiddlewareAlias: false,
                 showExcludedMiddleware: false,
             }).as('rlw_options'),
 
@@ -367,7 +374,13 @@
             },
 
             stylizeMiddleware(middleware) {
-                return `<div class="${middleware.excluded ? 'text-decoration-line-through' : ''}">- ${middleware.name}</div>`;
+                let alias = '';
+
+                if (this.options.showMiddlewareAlias && middleware.alias) {
+                    alias = ` (<span class="small">${middleware.alias}</span>)`;
+                }
+
+                return `<div class="${middleware.excluded ? 'text-decoration-line-through' : ''}">- ${middleware.name}${alias}</div>`;
             },
         });
     </script>

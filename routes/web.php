@@ -32,13 +32,15 @@ app()->make(Router::class)->get('route:list', static function (Router $router, R
 
     $router->flushMiddlewareGroups();
 
+    $invertedAliases = array_flip($aliases);
+
     $routes = collect($router->getRoutes())->map(static fn (Route $route) => [
         'domain' => $route->domain(),
         'method' => $route->methods(),
         'uri' => $route->uri(),
         'name' => $route->getName(),
         'action' => ltrim($route->getActionName(), '\\'),
-        'middleware' => (static function (Route $route, Router $router) {
+        'middleware' => (static function (Route $route, Router $router, array $aliases) {
             $closureMiddlewareAsString = static fn ($middleware) => $middleware instanceof Closure ? 'Closure' : $middleware;
 
             $middleware = collect($router->resolveMiddleware($route->gatherMiddleware()))->map($closureMiddlewareAsString);
@@ -47,14 +49,22 @@ app()->make(Router::class)->get('route:list', static function (Router $router, R
             $result = [];
 
             foreach ($middleware as $item) {
+                [$name, $parameters] = array_pad(explode(':', $item, 2), 2, null);
+                $alias = $aliases[$name] ?? null;
+
+                if ($alias && $parameters) {
+                    $alias .= ':' . $parameters;
+                }
+
                 $result[] = [
                     'name' => $item,
+                    'alias' => $alias,
                     'excluded' => isset($excludedMiddleware[$item]),
                 ];
             }
 
             return $result;
-        })($route, $router),
+        })($route, $router, $invertedAliases),
     ])->sortBy('uri')->values();
 
     $columns = [
