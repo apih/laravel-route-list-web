@@ -114,6 +114,12 @@
                         Expand Middleware Group
                     </label>
                 </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="options.showExcludedMiddleware" x-model="options.showExcludedMiddleware">
+                    <label class="form-check-label" for="options.showExcludedMiddleware">
+                        Show Excluded Middleware
+                    </label>
+                </div>
             </div>
             <div class="align-sm-self-stretch ms-auto pt-1">
                 <div class="d-flex align-items-center fw-bold">
@@ -187,7 +193,7 @@
                                 <div x-show="columns.middleware">
                                     <div class="small">
                                         <template x-for="item in route.middleware">
-                                            <div x-text="'- ' + item"></div>
+                                            <div x-html="stylizeMiddleware(item)" x-show="(options.showExcludedMiddleware && item.excluded) || !item.excluded"></div>
                                         </template>
                                     </div>
                                 </div>
@@ -225,6 +231,7 @@
 
             options: Alpine.$persist({
                 expandMiddlewareGroup: false,
+                showExcludedMiddleware: false,
             }).as('rlw_options'),
 
             page: Alpine.$persist(1).as('rlw_page'),
@@ -284,10 +291,16 @@
 
                     if (this.columns.middleware && this.options.expandMiddlewareGroup) {
                         for (const [group, groupMiddlewares] of Object.entries(this.groups)) {
-                            const index = route.middleware.indexOf(group);
+                            const index = route.middleware.findIndex((item) => item.name === group);
 
                             if (index !== -1) {
-                                route.middleware.splice(index, 1, ...groupMiddlewares);
+                                const excluded = route.middleware[index].excluded;
+
+                                route.middleware.splice(
+                                    index,
+                                    1,
+                                    ...groupMiddlewares.map((middleware) => ({ name: middleware, excluded }))
+                                );
                             }
                         }
                     }
@@ -351,6 +364,10 @@
                 }
 
                 return action;
+            },
+
+            stylizeMiddleware(middleware) {
+                return `<div class="${middleware.excluded ? 'text-decoration-line-through' : ''}">- ${middleware.name}</div>`;
             },
         });
     </script>

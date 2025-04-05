@@ -1,12 +1,10 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
 use Illuminate\Routing\Router;
-use Illuminate\Support\Facades\Route;
 
-Route::get('route:list', function (Request $request) {
-    $router = app(Router::class);
-
+app()->make(Router::class)->get('route:list', static function (Router $router, Request $request) {
     $aliases = $router->getMiddleware();
     $groups = $router->getMiddlewareGroups();
 
@@ -34,18 +32,30 @@ Route::get('route:list', function (Request $request) {
 
     $router->flushMiddlewareGroups();
 
-    $routes = collect(Route::getRoutes())->map(function ($route) use ($router) {
-        return [
-            'domain' => $route->domain(),
-            'method' => $route->methods(),
-            'uri' => $route->uri(),
-            'name' => $route->getName(),
-            'action' => ltrim($route->getActionName(), '\\'),
-            'middleware' => collect($router->gatherRouteMiddleware($route))->map(function ($middleware) {
-                return $middleware instanceof Closure ? 'Closure' : $middleware;
-            }),
-        ];
-    })->sortBy('uri')->values();
+    $routes = collect($router->getRoutes())->map(static fn (Route $route) => [
+        'domain' => $route->domain(),
+        'method' => $route->methods(),
+        'uri' => $route->uri(),
+        'name' => $route->getName(),
+        'action' => ltrim($route->getActionName(), '\\'),
+        'middleware' => (static function (Route $route, Router $router) {
+            $closureMiddlewareAsString = static fn ($middleware) => $middleware instanceof Closure ? 'Closure' : $middleware;
+
+            $middleware = collect($router->resolveMiddleware($route->gatherMiddleware()))->map($closureMiddlewareAsString);
+            $excludedMiddleware = collect($router->resolveMiddleware($route->excludedMiddleware()))->map($closureMiddlewareAsString)->keyByValue();
+
+            $result = [];
+
+            foreach ($middleware as $item) {
+                $result[] = [
+                    'name' => $item,
+                    'excluded' => isset($excludedMiddleware[$item]),
+                ];
+            }
+
+            return $result;
+        })($route, $router),
+    ])->sortBy('uri')->values();
 
     $columns = [
         'method' => 'Method',
