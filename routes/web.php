@@ -44,7 +44,7 @@ app()->make(Router::class)->get('route:list', static function (Router $router, R
             $closureMiddlewareAsString = static fn ($middleware) => $middleware instanceof Closure ? 'Closure' : $middleware;
 
             $middleware = collect($router->resolveMiddleware($route->gatherMiddleware()))->map($closureMiddlewareAsString);
-            $excludedMiddleware = collect($router->resolveMiddleware($route->excludedMiddleware()))->map($closureMiddlewareAsString)->keyByValue();
+            $excludedMiddleware = collect($router->resolveMiddleware($route->excludedMiddleware()))->map($closureMiddlewareAsString)->keyBy(static fn ($value) => $value);
 
             $result = [];
 
