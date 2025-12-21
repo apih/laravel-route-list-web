@@ -21,12 +21,24 @@
             font-weight: 500;
         }
 
+        .text-cyan {
+            color: var(--bs-cyan);
+        }
+
         .text-indigo {
             color: var(--bs-indigo);
         }
 
         .text-orange {
             color: var(--bs-orange);
+        }
+
+        .text-teal {
+            color: var(--bs-teal);
+        }
+
+        .text-yellow {
+            color: var(--bs-yellow);
         }
 
         .bg-teal {
@@ -358,16 +370,20 @@
             },
 
             stylizeUri(domain, uri) {
+                const textColorClass = this.darkMode ? 'text-teal' : 'text-orange';
+
                 uri = domain ? domain + '/' + uri : uri;
                 uri = uri.replace(/\/$/, '');
-                uri = uri.replaceAll('{', '<span class="text-orange">{').replaceAll('}', '}</span>');
+                uri = uri.replaceAll('{', `<span class="${textColorClass}">{`).replaceAll('}', '}</span>');
 
                 return uri;
             },
 
             stylizeAction(action) {
+                const textColorClass = this.darkMode ? 'text-cyan' : 'text-primary';
+
                 if (action.includes('@')) {
-                    action = action.replace('@', '<span class="text-primary">@') + '</span>';
+                    action = action.replace('@', `<span class="${textColorClass}">@`) + '</span>';
                 }
 
                 return action;
@@ -375,8 +391,10 @@
 
             stylizeMiddleware(middleware) {
                 const highlightParameters = (middleware) => {
+                    const textColorClass = this.darkMode ? 'text-yellow' : 'text-indigo';
+
                     if (middleware.includes(':')) {
-                        middleware = middleware.replace(':', '<span class="text-indigo">:') + '</span>';
+                        middleware = middleware.replace(':', `<span class="${textColorClass}">:`) + '</span>';
                     }
 
                     return middleware;
